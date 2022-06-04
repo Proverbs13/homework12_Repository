@@ -268,48 +268,52 @@ int shellSort(int *a)
 	return 0; //메인함수 종료
 }
 
-
-
 //재귀함수로 구현한 퀵정렬
-int quickSort(int *a, int n)
+int quickSort(int *a, int n) //n = MAX_ARRAY_SIZE
 {
-	int v, t;
-	int i, j;
-
-	if (n > 1)
+	int pivot; //피벗용 변수 
+	int temp;  //임시 저장용 변수 temp
+	int i; //피벗 기준 왼쪽부터 증가할 인덱스 나타낼 i
+	int j; //피벗 기준 오른쪽부터 줄어들 인덱스 나타낼 j
+	if (n > 1) //n 이 1보다 클 때
 	{
-		v = a[n-1];
-		i = -1;
-		j = n - 1;
+		pivot = a[n-1]; //피벗은 배열 맨 오른쪽 원소 a[n-1]
+		i = -1;    // ++i로 0부터 탐색시작 
+		j = n - 1; // --j로 n-2부터 탐색시작
 
-		while(1)
+		while(1)// 무한루프
 		{
-			while(a[++i] < v);
-			while(a[--j] > v);
+			while(a[++i] < pivot); 
+			//증가시킨 i 위치 원소가 피벗보다 클 때의 i 위치 찾을때까지 반복(i 증가)
+			while(a[--j] > pivot);
+			//감소시킨 j 위치 원소가 피벗보다 작을 때의 j 위치 찾을때까지 반복(j 증가)
 
-			if (i >= j) break;
-			t = a[i];
+			if (i >= j) break; //찾던도중 i가 j보다 크거나 같아질 때 반복문 탈출
+
+			//찾은 i, j 인덱스 위치 값들에 대해서 a[i] & a[j] 스왑
+			temp = a[i];
 			a[i] = a[j];
-			a[j] = t;
+			a[j] = temp;
 		}
-		t = a[i];
+		//a[i] & a[n-1] 스왑 => 피벗의 값을 i위치 원소값과 교체
+		temp = a[i];
 		a[i] = a[n-1];
-		a[n-1] = t;
+		a[n-1] = temp;
 
-		quickSort(a, i);
-		quickSort(a+i+1, n-i-1);
+		//이번 루틴의 피벗값은 i로 이동되며 고정
+
+		quickSort(a, i); // 피벗기준 왼쪽 부분집합 퀵정렬 호출
+		// 배열 a(시작주소) , 피벗 왼쪽의 배열 크기는 인덱스 0 ~ i-1까지 i개 이므로 i 를 인수로 보내줌
+
+		quickSort(a+i+1, n-i-1);// 피벗기준 오른쪽 부분집합 퀵정렬 호출
+		//배열 a+i+1(a배열이 i번째 인덱스다음 원소부터 시작해야하므로 a+i+1,
+		//피벗 오른쪽의 배열 크기는 인덱스 i+1 ~ n-1 까지 n개 이므로 n 을 인수로 보내줌
 	}
-
-
-	return 0;
+	return 0; // 함수종료
 }
 
 
-
 //해싱 함수들
-
-
-
 int hashCode(int key) {
    return key % MAX_HASH_TABLE_SIZE;
 }

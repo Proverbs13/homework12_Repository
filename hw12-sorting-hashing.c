@@ -19,13 +19,13 @@ int shellSort(int *a);     //셸 정렬 함수
 //재귀함수로 구현한 퀵정렬
 int quickSort(int *a, int n);
 
-/* hash code generator, key % MAX_HASH_TABLE_SIZE */
+//해시코드 생성기 키를 % MAX_HASH_TABLE_SIZE 연산으로 해시코드 생성 , 사실상 같음
 int hashCode(int key);
 
-/* array a에대 한 hash table을 만든다. */
+//배열로 해시테이블 구상
 int hashing(int *a, int **ht);
 
-/* hash table에서 key를 찾아 hash table의 index return */
+//해시테이블에서 검색하는 함수
 int search(int *ht, int key);
 
 
@@ -86,9 +86,9 @@ int main()
 		case 'h': case 'H':
 			printf("Hashing: \n");
 			printf("----------------------------------------------------------------\n");
-			printArray(array);
-			hashing(array, &hashtable);
-			printArray(hashtable);
+			printArray(array);// 해싱 대상 배열 출력
+			hashing(array, &hashtable); //해시테이블 구상
+			printArray(hashtable); //해시테이블 출력
 			break;
 
 		case 'e': case 'E':
@@ -313,72 +313,64 @@ int quickSort(int *a, int n) //n = MAX_ARRAY_SIZE
 }
 
 
-//해싱 함수들
-int hashCode(int key) {
-   return key % MAX_HASH_TABLE_SIZE;
+//해시코드 생성
+int hashCode(int key) { 
+   return key % MAX_HASH_TABLE_SIZE; // 키의 모듈러 연산
 }
 
-int hashing(int *a, int **ht)
+int hashing(int *a, int **ht) // 포인터의 주소값을 받아옴, 함수에서(*ht) = hashtable
 {
-	int *hashtable = NULL;
+	int *hashtable = NULL; //해시테이블 동적할당을 위한 포인터 생성
 
-	/* hash table이 NULL인 경우 메모리 할당 */
+	// 받아온 *ht 가 NULL일 때 - 첫 실행시
 	if(*ht == NULL) {
-		hashtable = (int*)malloc(sizeof(int) * MAX_ARRAY_SIZE);
-		*ht = hashtable;  /* 할당된 메모리의 주소를 복사 --> main에서 배열을 control 할수 있도록 함*/
-	} else {
-		hashtable = *ht;	/* hash table이 NULL이 아닌경우, table 재활용, reset to -1 */
+		hashtable = (int*)malloc(sizeof(int) * MAX_ARRAY_SIZE); //가리키는 공간에 해시테이블 크기만큼 동적할당
+		*ht = hashtable; //메모리 할당된 hashtable이 가진 주소값을*ht 에 전달 (이를 위해 이중포인터로 받아옴)
+	} 
+	else {//이미  (*ht)가 가리키는 공간에 동적할당을 했을 시
+		hashtable = *ht;//공간할당해놓은 주소값 hashtable에 대입
+	
 	}
-
-	for(int i = 0; i < MAX_HASH_TABLE_SIZE; i++)
+	for(int i = 0; i < MAX_HASH_TABLE_SIZE; i++){ 
 		hashtable[i] = -1;
+	} //해시테이블 내부 -1로 초기화
 
-	/*
-	for(int i = 0; i < MAX_HASH_TABLE_SIZE; i++)
-		printf("hashtable[%d] = %d\n", i, hashtable[i]);
-	*/
-
-	int key = -1;
+	//해시테이블 구상용 변수들 기본 -1 로 초기화
+	int key = -1; 
 	int hashcode = -1;
 	int index = -1;
-	for (int i = 0; i < MAX_ARRAY_SIZE; i++)
-	{
-		key = a[i];
-		hashcode = hashCode(key);
-		/*
-		printf("key = %d, hashcode = %d, hashtable[%d]=%d\n", key, hashcode, hashcode, hashtable[hashcode]);
-		*/
-		if (hashtable[hashcode] == -1)
-		{
-			hashtable[hashcode] = key;
-		} else 	{
 
-			index = hashcode;
-
-			while(hashtable[index] != -1)
-			{
-				index = (++index) % MAX_HASH_TABLE_SIZE;
-				/*
-				printf("index = %d\n", index);
-				*/
-			}
-			hashtable[index] = key;
+	// 해시테이블 최대크기만큼 반복
+	for (int i = 0; i < MAX_ARRAY_SIZE; i++){ //배열의 인덱스  i = 0 부터 12까지 반복
+		key = a[i]; //배열 값을 key로 받아옴
+		hashcode = hashCode(key); // key에 대한 해시코드 생성
+		
+		if (hashtable[hashcode] == -1){ //처음생성된 해시코드일 때
+			hashtable[hashcode] = key; //해시테이블의 값 = 키, 인덱스 = 해시코드
+		} 
+		else { //이미 생성됬던 해시코드 일 때 (해시코드=인덱스 위치 값이 차있을 때)
+			index = hashcode; // 인덱스에 해시코드 임시 저장하고
+			while(hashtable[index] != -1){ //값이 -1인 해시테이블 빈자리 찾을 때 까지 반복
+				index = (++index) % MAX_HASH_TABLE_SIZE;// 모듈러 연산이용 다음 칸으로 이동 
+			}   // 인덱스 12 다음에 0으로 이동
+			hashtable[index] = key; // 찾은 인덱스 위치에 키 대입
 		}
 	}
-
-	return 0;
+	return 0;//함수종료
 }
 
+//해시테이블에서 검색함수
 int search(int *ht, int key)
 {
-	int index = hashCode(key);
+	int index = hashCode(key); //검색하는 키에 대한 해시코드 받아옴
 
-	if(ht[index] == key)
-		return index;
-
-	while(ht[++index] != key)
-	{
-		index = index % MAX_HASH_TABLE_SIZE;
+	if(ht[index] == key){ //테이블에 값 = 키, 인덱스 = 해시코드로 들어간 키라면
+		return index; //바로 그 인덱스 반환하며 함수 종료
 	}
-	return index;
+	//인덱스 증가시키며 key 찾을 때까지 탐색
+	while(ht[++index] != key){
+		index = index % MAX_HASH_TABLE_SIZE;// 모듈러 연산이용 다음 칸으로 이동 
+		// 인덱스 12 다음에 0으로 이동
+	}
+	return index; //인덱스 반환하며 함수 종료
 }
